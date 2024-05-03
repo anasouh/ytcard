@@ -10,6 +10,7 @@ import {
   NumberInput,
   NumberInputField,
   NumberInputStepper,
+  Select,
   Stack,
   Switch,
   border,
@@ -73,6 +74,7 @@ export default function CardEditor() {
   const [nightMode, setNightMode] = useState(false);
   const [cardRef, setCardRef] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [format, setFormat] = useState("png");
 
   const isValidUrl = (url) => {
     const pattern = new RegExp("^(https?://)?(www.youtube.com|youtu.?be)/.+$");
@@ -89,13 +91,17 @@ export default function CardEditor() {
 
   const handleDownload = () => {
     const node = document.querySelector(".card");
-    toPng(node).then(
+    const convert = format === "svg" ? toSvg : toPng;
+    convert(node, {
+      canvasWidth: node.offsetWidth * 2,
+      canvasHeight: node.offsetHeight * 2,
+    }).then(
       (dataUrl) => {
         let img = new Image();
         img.src = dataUrl;
         let a = document.createElement("a");
         a.href = dataUrl;
-        a.download = "Image.png";
+        a.download = `${data.title}.${format}`;
         a.click();
       },
       (error) => {
@@ -124,79 +130,88 @@ export default function CardEditor() {
       {data && (
         <section>
           <div
-            className={`card ${nightMode ? "dark" : ""}`}
+            className="card-container"
             style={{
-              padding: `${padding}px`,
               borderRadius: `${borderRadius}px`,
             }}
-            ref={setCardRef}
           >
-            <div className="card-thumb-container">
-              <img
-                src={loading ? TRANSPARENT : data.thumbnail}
-                alt="placeholder"
-                className={`card-thumb ${loading ? "loading" : ""}`}
-                crossOrigin="anonymous"
-              />
-              <span
-                className="card-duration"
-                style={watchbarProgress === 0 ? { bottom: 8 } : {}}
-              >
-                {data.durationString}
-              </span>
-              <div
-                className="card-watchbar"
-                style={{
-                  display: watchbarProgress === 0 ? "none" : "block",
-                }}
-              >
-                <div
-                  className="card-watchbar-progress"
-                  style={{
-                    width: `${watchbarProgress}%`,
-                    borderRadius: `0 0 ${
-                      watchbarProgress === 100 ? 8 : 0
-                    }px 8px`,
-                  }}
-                ></div>
-              </div>
-            </div>
-            <div className="card-info">
-              <div className="card-avatar-title">
+            <div
+              className={`card ${nightMode ? "dark" : ""}`}
+              style={{
+                padding: `${padding}px`,
+                borderRadius: `${borderRadius}px`,
+              }}
+              ref={setCardRef}
+            >
+              <div className="card-thumb-container">
                 <img
-                  className={`card-channel-avatar ${loading ? "loading" : ""}`}
-                  src={loading ? TRANSPARENT : data.channel.thumbnail}
-                  alt="channel-avatar"
+                  src={loading ? TRANSPARENT : data.thumbnail}
+                  alt="placeholder"
+                  className={`card-thumb ${loading ? "loading" : ""}`}
                   crossOrigin="anonymous"
                 />
-                <div className="card-meta-container">
-                  <h2
-                    className={`card-title ${
-                      loading ? "box-loading full-width" : ""
+                <span
+                  className="card-duration"
+                  style={watchbarProgress === 0 ? { bottom: 8 } : {}}
+                >
+                  {data.durationString}
+                </span>
+                <div
+                  className="card-watchbar"
+                  style={{
+                    display: watchbarProgress === 0 ? "none" : "block",
+                  }}
+                >
+                  <div
+                    className="card-watchbar-progress"
+                    style={{
+                      width: `${watchbarProgress}%`,
+                      borderRadius: `0 0 ${
+                        watchbarProgress === 100 ? 8 : 0
+                      }px 8px`,
+                    }}
+                  ></div>
+                </div>
+              </div>
+              <div className="card-info">
+                <div className="card-avatar-title">
+                  <img
+                    className={`card-channel-avatar ${
+                      loading ? "loading" : ""
                     }`}
-                  >
-                    {shrinkTitle(data.title)}
-                  </h2>
-                  <div>
-                    <span
-                      className={`card-channel card-subtitle ${
-                        loading ? "box-loading quarter-width" : ""
+                    src={loading ? TRANSPARENT : data.channel.thumbnail}
+                    alt="channel-avatar"
+                    crossOrigin="anonymous"
+                  />
+                  <div className="card-meta-container">
+                    <h2
+                      className={`card-title ${
+                        loading ? "box-loading full-width" : ""
                       }`}
                     >
-                      {data.channel.name}
-                      {!loading && data.channel.verified && <VerifiedIcon />}
-                    </span>
-                    <div
-                      className={`card-meta ${
-                        loading ? "box-loading half-width" : ""
-                      }`}
-                    >
-                      <span className="card-views card-subtitle">
-                        {formatViews(data.views)} vues
+                      {shrinkTitle(data.title)}
+                    </h2>
+                    <div>
+                      <span
+                        className={`card-channel card-subtitle ${
+                          loading ? "box-loading quarter-width" : ""
+                        }`}
+                      >
+                        {data.channel.name}
+                        {!loading && data.channel.verified && <VerifiedIcon />}
                       </span>
-                      <span className="card-date card-subtitle">
-                        {data.uploaded}
-                      </span>
+                      <div
+                        className={`card-meta ${
+                          loading ? "box-loading half-width" : ""
+                        }`}
+                      >
+                        <span className="card-views card-subtitle">
+                          {formatViews(data.views)} vues
+                        </span>
+                        <span className="card-date card-subtitle">
+                          {data.uploaded}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -211,16 +226,28 @@ export default function CardEditor() {
           maxWidth: "400px",
         }}
       >
-        <Stack direction="row" spacing={4}>
+        <Stack direction="row" spacing={4} justifyContent="center">
           <Button
             leftIcon={<DownloadIcon />}
             isLoading={loading}
             colorScheme="red"
             variant="solid"
+            width="70%"
             onClick={handleDownload}
           >
-            Download as to PNG
+            Download
           </Button>
+          <Select
+            value={format}
+            onChange={(e) => {
+              setFormat(e.target.value);
+            }}
+            focusBorderColor={"#ff0000"}
+            width={"max-content"}
+          >
+            <option value="png">PNG</option>
+            <option value="svg">SVG</option>
+          </Select>
         </Stack>
         <Input
           placeholder="YouTube URL"
@@ -232,6 +259,15 @@ export default function CardEditor() {
           focusBorderColor={"#ff0000"}
         />
         <section className="properties">
+          <div className="property">
+            <h3>Night mode</h3>
+            <Switch
+              colorScheme={"red"}
+              onChange={(e) => {
+                setNightMode(e.target.checked);
+              }}
+            />
+          </div>
           <div className="property">
             <h3>Horizontal Padding</h3>
             <NumberInput
@@ -328,15 +364,6 @@ export default function CardEditor() {
               <SliderThumb />
               <SliderMark value={watchbarProgress} label="0%" />
             </Slider>
-          </div>
-          <div className="property">
-            <h3>Night mode</h3>
-            <Switch
-              colorScheme={"red"}
-              onChange={(e) => {
-                setNightMode(e.target.checked);
-              }}
-            />
           </div>
         </section>
       </article>

@@ -48,6 +48,14 @@
   flex-direction: column;
 }
 
+.justify-center {
+  justify-content: center;
+}
+
+.align-center {
+  align-items: center;
+}
+
 .gap-10 {
   gap: 10px;
 }
@@ -119,13 +127,16 @@ main {
   color: transparent !important;
 }
 
+.card-container {
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+}
+
 .card {
   width: max-content;
   padding: 16px;
   background-color: var(--color-background);
   font-family: "Roboto", sans-serif;
   transition: all ease 0.3s;
-  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
   color: var(--color-text);
 }
 
