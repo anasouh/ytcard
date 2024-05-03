@@ -14,3 +14,8 @@ export function shrinkTitle(title, maxLength = 74) {
   }
   return title;
 }
+
+export const numberInputFormatterAndParser = (unit) => ({
+  format: (value) => `${value} ${unit}`,
+  parse: (value) => value.replace(` ${unit}`, ""),
+});

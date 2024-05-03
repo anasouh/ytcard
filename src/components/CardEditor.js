@@ -1,6 +1,10 @@
 "use client";
 
-import { formatViews, shrinkTitle } from "@/utils/format";
+import {
+  formatViews,
+  numberInputFormatterAndParser,
+  shrinkTitle,
+} from "@/utils/format";
 import {
   Button,
   ChakraProvider,
@@ -226,7 +230,7 @@ export default function CardEditor() {
   };
 
   return (
-    <main>
+    <main className="editor">
       {data && (
         <section className="flex-column gap-20">
           {error && (
@@ -381,6 +385,7 @@ export default function CardEditor() {
               }}
               className="full-width"
               focusBorderColor={"#ff0000"}
+              {...numberInputFormatterAndParser("px")}
             >
               <NumberInputField />
               <NumberInputStepper>
@@ -412,6 +417,7 @@ export default function CardEditor() {
               }}
               className="full-width"
               focusBorderColor={"#ff0000"}
+              {...numberInputFormatterAndParser("px")}
             >
               <NumberInputField />
               <NumberInputStepper>
@@ -445,6 +451,7 @@ export default function CardEditor() {
               }}
               className="full-width"
               focusBorderColor={"#ff0000"}
+              {...numberInputFormatterAndParser("%")}
             >
               <NumberInputField />
               <NumberInputStepper>
