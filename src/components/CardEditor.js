@@ -13,6 +13,7 @@ import {
   Select,
   Stack,
   Switch,
+  Text,
   border,
 } from "@chakra-ui/react";
 import {
@@ -22,9 +23,10 @@ import {
   SliderThumb,
   SliderMark,
 } from "@chakra-ui/react";
-import { DownloadIcon } from "@chakra-ui/icons";
+import { CheckCircleIcon, DownloadIcon, LinkIcon } from "@chakra-ui/icons";
 import { toPng, toSvg } from "html-to-image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 const TRANSPARENT = "/assets/img/transparent.png";
 
@@ -66,15 +68,74 @@ function VerifiedIcon() {
   );
 }
 
+const defaultPadding = 25;
+const defaultBorderRadius = 25;
+const defaultWatchbarProgress = 0;
+const defaultNightMode = false;
+
 export default function CardEditor() {
+  const searchParams = useSearchParams();
   const [data, setData] = useState(mockData);
-  const [padding, setPadding] = useState(25);
-  const [borderRadius, setBorderRadius] = useState(25);
-  const [watchbarProgress, setWatchbarProgress] = useState(0);
-  const [nightMode, setNightMode] = useState(false);
+  const [padding, setPadding] = useState(defaultPadding);
+  const [borderRadius, setBorderRadius] = useState(defaultBorderRadius);
+  const [watchbarProgress, setWatchbarProgress] = useState(
+    defaultWatchbarProgress
+  );
+  const [nightMode, setNightMode] = useState(defaultNightMode);
   const [cardRef, setCardRef] = useState(null);
   const [loading, setLoading] = useState(false);
   const [format, setFormat] = useState("png");
+  const [error, setError] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  const toggleCopied = () => {
+    setCopied(true);
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
+  };
+
+  const getFromLocalStorageOrDefault = (key, defaultValue) => {
+    const value = localStorage.getItem(key);
+    return value ? JSON.parse(value) : defaultValue;
+  };
+
+  useEffect(() => {
+    if (searchParams.has("video")) {
+      handleUrlChange(
+        `https://www.youtube.com/watch?v=${searchParams.get("video")}`
+      );
+    }
+    if (
+      searchParams.has("padding") ||
+      searchParams.has("borderRadius") ||
+      searchParams.has("watchbarProgress") ||
+      searchParams.has("nightMode")
+    ) {
+      setPadding(searchParams.get("padding") || defaultPadding);
+      setBorderRadius(searchParams.get("borderRadius") || defaultBorderRadius);
+      setWatchbarProgress(
+        parseInt(
+          searchParams.get("watchbarProgress") || defaultWatchbarProgress
+        )
+      );
+      setNightMode(
+        searchParams.get("nightMode") === "true" || defaultNightMode
+      );
+    } else {
+      setPadding(getFromLocalStorageOrDefault("padding", defaultPadding));
+      setBorderRadius(
+        getFromLocalStorageOrDefault("borderRadius", defaultBorderRadius)
+      );
+      setWatchbarProgress(
+        getFromLocalStorageOrDefault(
+          "watchbarProgress",
+          defaultWatchbarProgress
+        )
+      );
+      setNightMode(getFromLocalStorageOrDefault("nightMode", defaultNightMode));
+    }
+  }, [searchParams]);
 
   const isValidUrl = (url) => {
     const pattern = new RegExp("^(https?://)?(www.youtube.com|youtu.?be)/.+$");
@@ -116,19 +177,52 @@ export default function CardEditor() {
       if (id) {
         setLoading(true);
         const response = await fetch(`/api/video?id=${id}`);
-        setLoading(false);
         if (response.ok) {
           const video = await response.json();
+          setLoading(false);
+          setError(null);
           setData(video);
+        } else {
+          setError("Failed to fetch video");
         }
       }
     }
+  };
+
+  const resetProperties = () => {
+    setPadding(defaultPadding);
+    setBorderRadius(defaultBorderRadius);
+    setWatchbarProgress(defaultWatchbarProgress);
+    setNightMode(defaultNightMode);
+    localStorage.clear();
+  };
+
+  const saveProperties = () => {
+    localStorage.setItem("padding", JSON.stringify(padding));
+    localStorage.setItem("borderRadius", JSON.stringify(borderRadius));
+    localStorage.setItem("watchbarProgress", JSON.stringify(watchbarProgress));
+    localStorage.setItem("nightMode", JSON.stringify(nightMode));
+  };
+
+  const getShareableLink = () => {
+    if (typeof window !== "undefined" || !data)
+      return `${window.location.origin}/?video=${data.id}&padding=${padding}&borderRadius=${borderRadius}&watchbarProgress=${watchbarProgress}&nightMode=${nightMode}`;
   };
 
   return (
     <main className="flex screen-height screen-width">
       {data && (
         <section>
+          {error && (
+            <Text
+              color="red.500"
+              fontWeight="bold"
+              textAlign="center"
+              paddingBottom="20px"
+            >
+              {error}
+            </Text>
+          )}
           <div
             className="card-container"
             style={{
@@ -165,7 +259,7 @@ export default function CardEditor() {
                   <div
                     className="card-watchbar-progress"
                     style={{
-                      width: `${watchbarProgress}%`,
+                      width: `${Math.min(watchbarProgress, 100)}%`,
                       borderRadius: `0 0 ${
                         watchbarProgress === 100 ? 8 : 0
                       }px 8px`,
@@ -263,13 +357,14 @@ export default function CardEditor() {
             <h3>Night mode</h3>
             <Switch
               colorScheme={"red"}
+              isChecked={nightMode}
               onChange={(e) => {
                 setNightMode(e.target.checked);
               }}
             />
           </div>
           <div className="property">
-            <h3>Horizontal Padding</h3>
+            <h3>Padding</h3>
             <NumberInput
               value={padding}
               onChange={(value) => {
@@ -366,6 +461,43 @@ export default function CardEditor() {
             </Slider>
           </div>
         </section>
+        <Stack direction="row" spacing={4} justifyContent="center">
+          <Button
+            colorScheme="red"
+            variant="outline"
+            onClick={resetProperties}
+            flex={1}
+          >
+            Reset
+          </Button>
+          <Button
+            colorScheme="red"
+            variant="solid"
+            onClick={saveProperties}
+            flex={1}
+          >
+            Save
+          </Button>
+        </Stack>
+        <Stack direction="row" spacing={4} justifyContent="center">
+          <Input
+            value={getShareableLink()}
+            isReadOnly
+            className="full-width"
+            colorScheme={"red"}
+          />
+          <Button
+            leftIcon={copied ? <CheckCircleIcon /> : <LinkIcon />}
+            colorScheme="red"
+            variant="solid"
+            onClick={(e) => {
+              navigator.clipboard.writeText(getShareableLink());
+              toggleCopied();
+            }}
+          >
+            {copied ? "Copied!" : "Copy"}
+          </Button>
+        </Stack>
       </article>
     </main>
   );
