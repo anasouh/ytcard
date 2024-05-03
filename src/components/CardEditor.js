@@ -25,6 +25,8 @@ import { DownloadIcon } from "@chakra-ui/icons";
 import { toPng, toSvg } from "html-to-image";
 import { useState } from "react";
 
+const TRANSPARENT = "/assets/img/transparent.png";
+
 const mockData = {
   id: "DanJ4sb6KxY",
   thumbnail: "/data/DanJ4sb6KxY.jpg",
@@ -70,6 +72,7 @@ export default function CardEditor() {
   const [watchbarProgress, setWatchbarProgress] = useState(0);
   const [nightMode, setNightMode] = useState(false);
   const [cardRef, setCardRef] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const isValidUrl = (url) => {
     const pattern = new RegExp("^(https?://)?(www.youtube.com|youtu.?be)/.+$");
@@ -105,7 +108,9 @@ export default function CardEditor() {
     if (isValidUrl(url)) {
       const id = getId(url);
       if (id) {
+        setLoading(true);
         const response = await fetch(`/api/video?id=${id}`);
+        setLoading(false);
         if (response.ok) {
           const video = await response.json();
           setData(video);
@@ -128,9 +133,9 @@ export default function CardEditor() {
           >
             <div className="card-thumb-container">
               <img
-                src={data.thumbnail}
+                src={loading ? TRANSPARENT : data.thumbnail}
                 alt="placeholder"
-                className="card-thumb"
+                className={`card-thumb ${loading ? "loading" : ""}`}
                 crossOrigin="anonymous"
               />
               <span
@@ -159,19 +164,33 @@ export default function CardEditor() {
             <div className="card-info">
               <div className="card-avatar-title">
                 <img
-                  className="card-channel-avatar"
-                  src={data.channel.thumbnail}
+                  className={`card-channel-avatar ${loading ? "loading" : ""}`}
+                  src={loading ? TRANSPARENT : data.channel.thumbnail}
                   alt="channel-avatar"
                   crossOrigin="anonymous"
                 />
                 <div className="card-meta-container">
-                  <h2 className="card-title">{shrinkTitle(data.title)}</h2>
+                  <h2
+                    className={`card-title ${
+                      loading ? "box-loading full-width" : ""
+                    }`}
+                  >
+                    {shrinkTitle(data.title)}
+                  </h2>
                   <div>
-                    <span className="card-channel card-subtitle">
+                    <span
+                      className={`card-channel card-subtitle ${
+                        loading ? "box-loading quarter-width" : ""
+                      }`}
+                    >
                       {data.channel.name}
-                      {data.channel.verified && <VerifiedIcon />}
+                      {!loading && data.channel.verified && <VerifiedIcon />}
                     </span>
-                    <div className="card-meta">
+                    <div
+                      className={`card-meta ${
+                        loading ? "box-loading half-width" : ""
+                      }`}
+                    >
                       <span className="card-views card-subtitle">
                         {formatViews(data.views)} vues
                       </span>
@@ -195,6 +214,7 @@ export default function CardEditor() {
         <Stack direction="row" spacing={4}>
           <Button
             leftIcon={<DownloadIcon />}
+            isLoading={loading}
             colorScheme="red"
             variant="solid"
             onClick={handleDownload}

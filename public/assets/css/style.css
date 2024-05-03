@@ -76,6 +76,14 @@ main {
   width: 100%;
 }
 
+.half-width {
+  width: 50%;
+}
+
+.quarter-width {
+  width: 25%;
+}
+
 .card {
   --color-primary: #ff0000;
   --color-secondary: #606060;
@@ -100,6 +108,17 @@ main {
   fill: var(--color-secondary);
 }
 
+.box-loading {
+  height: 0.9em;
+  background-color: var(--color-secondary) !important;
+  color: transparent !important;
+  border-radius: 4px;
+}
+
+.box-loading * {
+  color: transparent !important;
+}
+
 .card {
   width: max-content;
   padding: 16px;
@@ -117,7 +136,12 @@ main {
 
 .card-thumb {
   width: 100%;
+  height: calc(363px * calc(9 / 16));
   border-radius: 8px;
+}
+
+.card-thumb.loading {
+  background-color: var(--color-secondary);
 }
 
 .card-duration {
@@ -166,6 +190,10 @@ main {
   display: flex;
 }
 
+.card-meta.box-loading {
+  margin-top: 2px;
+}
+
 .card-subtitle {
   font-size: 14px;
   color: var(--color-secondary);
@@ -181,6 +209,10 @@ main {
   border-radius: 50%;
   width: 36px;
   height: 36px;
+}
+
+.card-channel-avatar.loading {
+  background-color: var(--color-secondary);
 }
 
 .card-avatar-title {
