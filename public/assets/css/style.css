@@ -1,0 +1,212 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap");
+
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.gap-10 {
+  gap: 10px;
+}
+
+.gap-20 {
+  gap: 20px;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 50px;
+}
+
+.screen-height {
+  height: 100vh;
+}
+
+.screen-width {
+  width: 100vw;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.card {
+  --color-primary: #ff0000;
+  --color-secondary: #606060;
+  --color-background: #fff;
+  --color-text: #000000;
+  --color-text-secondary: #ffffff;
+  --color-border: #e0e0e0;
+  --color-box-background: #aaaaaa;
+}
+
+.card.dark {
+  --color-primary: #ff0000;
+  --color-secondary: #aaaaaa;
+  --color-background: #151515;
+  --color-text: #ffffff;
+  --color-text-secondary: #ffffff;
+  --color-border: #333333;
+  --color-box-background: #0f0f0f;
+}
+
+.fill-secondary {
+  fill: var(--color-secondary);
+}
+
+.card {
+  width: max-content;
+  padding: 16px;
+  background-color: var(--color-background);
+  font-family: "Roboto", sans-serif;
+  transition: all ease 0.3s;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+  color: var(--color-text);
+}
+
+.card-thumb-container {
+  position: relative;
+  width: 363px;
+}
+
+.card-thumb {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.card-duration {
+  position: absolute;
+  bottom: 12px;
+  right: 8px;
+  background-color: #00000078;
+  color: white;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.card-date {
+  font-size: 14px;
+  color: var(--color-secondary);
+}
+
+.card-date::before {
+  content: "•";
+  margin: 0 4px;
+}
+
+.card-info {
+  width: 363px;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.card-meta-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.card-meta {
+  display: flex;
+}
+
+.card-subtitle {
+  font-size: 14px;
+  color: var(--color-secondary);
+}
+
+.card-channel {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.card-channel-avatar {
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+}
+
+.card-avatar-title {
+  display: flex;
+  gap: 10px;
+}
+
+.card-watchbar {
+  position: absolute;
+  width: 100%;
+  height: 4px;
+  background-color: var(--color-box-background);
+  border-radius: 0 0 8px 8px;
+  margin-top: 8px;
+  bottom: 0px;
+}
+
+.card-watchbar-progress {
+  width: 50%;
+  height: 100%;
+  border-radius: 0 0 8px 8px;
+  background-color: #ff0000;
+}
+
+.properties {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
