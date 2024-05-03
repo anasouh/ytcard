@@ -6,6 +6,11 @@ import { ChakraProvider, Link, Stack, Text } from "@chakra-ui/react";
 function ToolPage() {
   return (
     <ChakraProvider>
+      <title>YouTube Card Generator</title>
+      <meta
+        name="description"
+        content="Generate YouTube cards for your videos."
+      />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <link rel="stylesheet" href="/assets/css/style.css" />
       <main className="flex-column screen-height align-center justify-center gap-50">
