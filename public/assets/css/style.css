@@ -66,16 +66,20 @@
 
 main {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 50px;
+  gap: 80px;
+  width: 100%;
+  height: 100vh;
 }
 
-@media screen and (max-width: 1080px) {
+@media screen and (max-width: 1000px) {
   main {
-    justify-content: flex-start;
+    flex-direction: column;
     margin-top: 50px;
+    padding: 0 20px;
+    padding-bottom: 100px;
+    height: initial;
   }
 }
 
@@ -149,7 +153,8 @@ main {
 
 .card-thumb-container {
   position: relative;
-  width: 363px;
+  max-width: 363px;
+  width: 100%;
 }
 
 .card-thumb {
@@ -171,7 +176,7 @@ main {
   padding: 0 4px;
   border-radius: 4px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .card-title {

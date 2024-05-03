@@ -15,6 +15,7 @@ import {
   Switch,
   Text,
   border,
+  useToast,
 } from "@chakra-ui/react";
 import {
   Slider,
@@ -87,9 +88,17 @@ export default function CardEditor() {
   const [format, setFormat] = useState("png");
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
+  const toast = useToast();
 
   const toggleCopied = () => {
     setCopied(true);
+    toast({
+      title: "Link copied",
+      description: "The shareable link has been copied to your clipboard.",
+      status: "success",
+      duration: 5000,
+      isClosable: true,
+    });
     setTimeout(() => {
       setCopied(false);
     }, 2000);
@@ -202,6 +211,13 @@ export default function CardEditor() {
     localStorage.setItem("borderRadius", JSON.stringify(borderRadius));
     localStorage.setItem("watchbarProgress", JSON.stringify(watchbarProgress));
     localStorage.setItem("nightMode", JSON.stringify(nightMode));
+    toast({
+      title: "Properties saved",
+      description: "Your properties have been saved successfully.",
+      status: "success",
+      duration: 5000,
+      isClosable: true,
+    });
   };
 
   const getShareableLink = () => {
@@ -210,9 +226,9 @@ export default function CardEditor() {
   };
 
   return (
-    <main className="flex screen-height screen-width">
+    <main>
       {data && (
-        <section>
+        <section className="flex-column gap-20">
           {error && (
             <Text
               color="red.500"
@@ -312,6 +328,41 @@ export default function CardEditor() {
               </div>
             </div>
           </div>
+          <Stack spacing={4}>
+            <Input
+              placeholder="YouTube URL"
+              type="url"
+              onChange={(e) => {
+                handleUrlChange(e.target.value);
+              }}
+              className="full-width"
+              focusBorderColor={"#ff0000"}
+              width="100%"
+            />
+            <Stack direction="row" spacing={4} justifyContent="center">
+              <Button
+                leftIcon={<DownloadIcon />}
+                isLoading={loading}
+                colorScheme="red"
+                variant="solid"
+                flex={1}
+                onClick={handleDownload}
+              >
+                Download
+              </Button>
+              <Select
+                value={format}
+                onChange={(e) => {
+                  setFormat(e.target.value);
+                }}
+                focusBorderColor={"#ff0000"}
+                width={"max-content"}
+              >
+                <option value="png">PNG</option>
+                <option value="svg">SVG</option>
+              </Select>
+            </Stack>
+          </Stack>
         </section>
       )}
       <article
@@ -320,49 +371,7 @@ export default function CardEditor() {
           maxWidth: "400px",
         }}
       >
-        <Stack direction="row" spacing={4} justifyContent="center">
-          <Button
-            leftIcon={<DownloadIcon />}
-            isLoading={loading}
-            colorScheme="red"
-            variant="solid"
-            width="70%"
-            onClick={handleDownload}
-          >
-            Download
-          </Button>
-          <Select
-            value={format}
-            onChange={(e) => {
-              setFormat(e.target.value);
-            }}
-            focusBorderColor={"#ff0000"}
-            width={"max-content"}
-          >
-            <option value="png">PNG</option>
-            <option value="svg">SVG</option>
-          </Select>
-        </Stack>
-        <Input
-          placeholder="YouTube URL"
-          type="url"
-          onChange={(e) => {
-            handleUrlChange(e.target.value);
-          }}
-          className="full-width"
-          focusBorderColor={"#ff0000"}
-        />
         <section className="properties">
-          <div className="property">
-            <h3>Night mode</h3>
-            <Switch
-              colorScheme={"red"}
-              isChecked={nightMode}
-              onChange={(e) => {
-                setNightMode(e.target.checked);
-              }}
-            />
-          </div>
           <div className="property">
             <h3>Padding</h3>
             <NumberInput
@@ -459,6 +468,16 @@ export default function CardEditor() {
               <SliderThumb />
               <SliderMark value={watchbarProgress} label="0%" />
             </Slider>
+          </div>
+          <div className="property">
+            <h3>Night mode</h3>
+            <Switch
+              colorScheme={"red"}
+              isChecked={nightMode}
+              onChange={(e) => {
+                setNightMode(e.target.checked);
+              }}
+            />
           </div>
         </section>
         <Stack direction="row" spacing={4} justifyContent="center">
