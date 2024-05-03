@@ -2,6 +2,7 @@
 
 import { formatViews, shrinkTitle } from "@/utils/format";
 import {
+  Button,
   ChakraProvider,
   Input,
   NumberDecrementStepper,
@@ -9,6 +10,7 @@ import {
   NumberInput,
   NumberInputField,
   NumberInputStepper,
+  Stack,
   Switch,
   border,
 } from "@chakra-ui/react";
@@ -19,20 +21,20 @@ import {
   SliderThumb,
   SliderMark,
 } from "@chakra-ui/react";
+import { DownloadIcon } from "@chakra-ui/icons";
+import { toPng, toSvg } from "html-to-image";
 import { useState } from "react";
 
 const mockData = {
   id: "DanJ4sb6KxY",
-  thumbnail:
-    "https://i.ytimg.com/vi/DanJ4sb6KxY/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAIXExV7S_DnrHmJMn6U3a6HQyzgg",
+  thumbnail: "/data/DanJ4sb6KxY.jpg",
   durationString: "2:38:55",
   title:
     "Bafé Gomis, La Grande Carrière de la Panthère - Zack en Roue Libre avec Bafé Gomis (S07E29)",
   channel: {
     name: "ZACK",
     verified: true,
-    thumbnail:
-      "https://yt3.ggpht.com/ytc/AIdro_kDPp1JFfNZw1d-bzKRR1k5CRHqWQrm74Eoxe7akk2Xsak=s68-c-k-c0x00ffffff-no-rj",
+    thumbnail: "/data/UCSJxne19pJyW7l7HjHM_LRg.jpg",
   },
   uploaded: "2 jours",
   views: 101000,
@@ -67,6 +69,7 @@ export default function CardEditor() {
   const [borderRadius, setBorderRadius] = useState(25);
   const [watchbarProgress, setWatchbarProgress] = useState(0);
   const [nightMode, setNightMode] = useState(false);
+  const [cardRef, setCardRef] = useState(null);
 
   const isValidUrl = (url) => {
     const pattern = new RegExp("^(https?://)?(www.youtube.com|youtu.?be)/.+$");
@@ -81,11 +84,21 @@ export default function CardEditor() {
     return match ? match[4] : null;
   };
 
-  const sanitizeHtml = (html) => {
-    const doc = new DOMParser().parseFromString(html, "text/html");
-    doc.querySelectorAll("script").forEach((script) => script.remove());
-    doc.querySelectorAll("style").forEach((style) => style.remove());
-    return doc.body.innerHTML;
+  const handleDownload = () => {
+    const node = document.querySelector(".card");
+    toPng(node).then(
+      (dataUrl) => {
+        let img = new Image();
+        img.src = dataUrl;
+        let a = document.createElement("a");
+        a.href = dataUrl;
+        a.download = "Image.png";
+        a.click();
+      },
+      (error) => {
+        console.error("Failed to generate image", error);
+      }
+    );
   };
 
   const handleUrlChange = async (url) => {
@@ -111,12 +124,14 @@ export default function CardEditor() {
               padding: `${padding}px`,
               borderRadius: `${borderRadius}px`,
             }}
+            ref={setCardRef}
           >
             <div className="card-thumb-container">
               <img
                 src={data.thumbnail}
                 alt="placeholder"
                 className="card-thumb"
+                crossOrigin="anonymous"
               />
               <span
                 className="card-duration"
@@ -147,6 +162,7 @@ export default function CardEditor() {
                   className="card-channel-avatar"
                   src={data.channel.thumbnail}
                   alt="channel-avatar"
+                  crossOrigin="anonymous"
                 />
                 <div className="card-meta-container">
                   <h2 className="card-title">{shrinkTitle(data.title)}</h2>
@@ -176,6 +192,16 @@ export default function CardEditor() {
           maxWidth: "400px",
         }}
       >
+        <Stack direction="row" spacing={4}>
+          <Button
+            leftIcon={<DownloadIcon />}
+            colorScheme="red"
+            variant="solid"
+            onClick={handleDownload}
+          >
+            Download as to PNG
+          </Button>
+        </Stack>
         <Input
           placeholder="YouTube URL"
           type="url"

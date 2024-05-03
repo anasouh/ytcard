@@ -8,7 +8,7 @@ export function formatViews(views) {
   }
 }
 
-export function shrinkTitle(title, maxLength = 50) {
+export function shrinkTitle(title, maxLength = 74) {
   if (title.length > maxLength) {
     return title.slice(0, maxLength).split(" ").slice(0, -1).join(" ") + "...";
   }
