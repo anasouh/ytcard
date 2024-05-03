@@ -1,6 +1,15 @@
 import { youtube } from "scrape-youtube";
 import fs from "fs";
 
+const FIFTEEN_MINUTES = 15 * 60 * 1000;
+
+const deleteIn15Minutes = (file) => {
+  setTimeout(() => {
+    fs.unlinkSync(file);
+    console.log(`Deleted ${file}`);
+  }, FIFTEEN_MINUTES);
+};
+
 const saveImage = async (imageUrl, filename) => {
   filename = filename.replace(/\W/g, "_");
   if (!fs.existsSync(`public/data/${filename}.jpg`)) {
@@ -9,6 +18,7 @@ const saveImage = async (imageUrl, filename) => {
     const file = `public/data/${filename}.jpg`;
     const buffer = await blob.arrayBuffer();
     fs.writeFileSync(file, Buffer.from(buffer));
+    deleteIn15Minutes(file);
     return file.slice(6);
   }
   return `/data/${filename}.jpg`;
