@@ -1,4 +1,3 @@
-import { youtube } from "scrape-youtube";
 import fs from "fs";
 
 const FIFTEEN_MINUTES = 15 * 60 * 1000;
@@ -24,21 +23,65 @@ const saveImage = async (imageUrl, filename) => {
   return `/data/${filename}.jpg`;
 };
 
+const getChannelData = async (channelId) => {
+  const response = await fetch(
+    `https://www.googleapis.com/youtube/v3/channels?part=id%2C+snippet&id=${channelId}&key=${process.env.YOUTUBE_API_KEY}`,
+    {
+      headers: {
+        Accept: "application/json",
+      },
+    }
+  );
+  if (response.ok) {
+    const { items } = await response.json();
+    const [channel] = items;
+    const { snippet } = channel;
+    const thumbnail = snippet.thumbnails.default.url;
+    channel.thumbnail = await saveImage(thumbnail, channel.id);
+    return channel;
+  }
+  return null;
+};
+
 /**
  * @param {import("next").NextApiRequest} req
  * @param {import("next").NextApiResponse} res
  */
 export default async (req, res) => {
   const videoId = req.query.id;
-  console.log(videoId);
-  const { videos } = await youtube.search(videoId);
-  if (!videos.length) {
-    return NextResponse.error("Video not found", 404);
+  const response = await fetch(
+    `https://www.googleapis.com/youtube/v3/videos?part=id%2C+snippet%2C+contentDetails%2C+statistics&id=${videoId}&key=${process.env.YOUTUBE_API_KEY}`,
+    {
+      headers: {
+        Accept: "application/json",
+      },
+    }
+  );
+  if (response.ok) {
+    const { items } = await response.json();
+    const [video] = items;
+    const { snippet } = video;
+    const thumbnailUrl = snippet.thumbnails.maxres.url;
+    const channelId = snippet.channelId;
+    const channelData = await getChannelData(channelId);
+    const thumbnail = await saveImage(thumbnailUrl, video.id);
+    const channelThumbnail = await saveImage(channelData.thumbnail, channelId);
+    const views = Number(video.statistics.viewCount);
+    const duration = video.contentDetails.duration;
+    const date = new Date(video.snippet.publishedAt);
+    const title = snippet.title;
+    return res.status(200).json({
+      title,
+      thumbnail,
+      channel: {
+        id: channelId,
+        title: channelData.title,
+        thumbnail: channelThumbnail,
+      },
+      views,
+      duration,
+      uploaded: date.toISOString(),
+    });
   }
-  const video = videos[0];
-  const thumbnail = `https://i.ytimg.com/vi/${video.id}/hq720.jpg`;
-  const channelThumbnail = video.channel.thumbnail;
-  video.thumbnail = await saveImage(thumbnail, video.id);
-  video.channel.thumbnail = await saveImage(channelThumbnail, video.channel.id);
-  return res.status(200).json(video);
+  return res.status(404).json({ message: "Video not found" });
 };

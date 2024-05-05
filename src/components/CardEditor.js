@@ -1,6 +1,8 @@
 "use client";
 
 import {
+  formatDate,
+  formatDuration,
   formatViews,
   numberInputFormatterAndParser,
   shrinkTitle,
@@ -38,16 +40,15 @@ const TRANSPARENT = "/assets/img/transparent.png";
 const mockData = {
   id: "DanJ4sb6KxY",
   thumbnail: "/data/DanJ4sb6KxY.jpg",
-  durationString: "2:38:55",
+  duration: "PT2H38M55S",
   title:
     "Bafé Gomis, La Grande Carrière de la Panthère - Zack en Roue Libre avec Bafé Gomis (S07E29)",
   channel: {
     name: "ZACK",
-    verified: true,
     thumbnail: "/data/UCSJxne19pJyW7l7HjHM_LRg.jpg",
   },
-  uploaded: "2 jours",
-  views: 101000,
+  uploaded: "2024-04-30T12:00:13Z",
+  views: 163870,
 };
 
 function VerifiedIcon() {
@@ -77,6 +78,7 @@ const defaultPadding = 25;
 const defaultBorderRadius = 25;
 const defaultWatchbarProgress = 0;
 const defaultNightMode = false;
+const defaultVerified = false;
 
 export default function CardEditor() {
   const searchParams = useSearchParams();
@@ -87,6 +89,7 @@ export default function CardEditor() {
     defaultWatchbarProgress
   );
   const [nightMode, setNightMode] = useState(defaultNightMode);
+  const [verified, setVerified] = useState(defaultVerified);
   const [cardRef, setCardRef] = useState(null);
   const [loading, setLoading] = useState(false);
   const [format, setFormat] = useState("png");
@@ -123,7 +126,8 @@ export default function CardEditor() {
       searchParams.has("padding") ||
       searchParams.has("borderRadius") ||
       searchParams.has("watchbarProgress") ||
-      searchParams.has("nightMode")
+      searchParams.has("nightMode") ||
+      searchParams.has("verified")
     ) {
       setPadding(searchParams.get("padding") || defaultPadding);
       setBorderRadius(searchParams.get("borderRadius") || defaultBorderRadius);
@@ -135,6 +139,7 @@ export default function CardEditor() {
       setNightMode(
         searchParams.get("nightMode") === "true" || defaultNightMode
       );
+      setVerified(searchParams.get("verified") === "true" || defaultVerified);
     } else {
       setPadding(getFromLocalStorageOrDefault("padding", defaultPadding));
       setBorderRadius(
@@ -226,7 +231,7 @@ export default function CardEditor() {
 
   const getShareableLink = () => {
     if (typeof window !== "undefined" || !data)
-      return `${window.location.origin}/?video=${data.id}&padding=${padding}&borderRadius=${borderRadius}&watchbarProgress=${watchbarProgress}&nightMode=${nightMode}`;
+      return `${window.location.origin}/?video=${data.id}&padding=${padding}&borderRadius=${borderRadius}&watchbarProgress=${watchbarProgress}&nightMode=${nightMode}&verified=${verified}`;
   };
 
   return (
@@ -268,7 +273,7 @@ export default function CardEditor() {
                   className="card-duration"
                   style={watchbarProgress === 0 ? { bottom: 8 } : {}}
                 >
-                  {data.durationString}
+                  {formatDuration(data.duration)}
                 </span>
                 <div
                   className="card-watchbar"
@@ -312,7 +317,7 @@ export default function CardEditor() {
                         }`}
                       >
                         {data.channel.name}
-                        {!loading && data.channel.verified && <VerifiedIcon />}
+                        {verified && <VerifiedIcon />}
                       </span>
                       <div
                         className={`card-meta ${
@@ -323,7 +328,7 @@ export default function CardEditor() {
                           {formatViews(data.views)} vues
                         </span>
                         <span className="card-date card-subtitle">
-                          {data.uploaded}
+                          Il y a {formatDate(data.uploaded)}
                         </span>
                       </div>
                     </div>
@@ -476,16 +481,29 @@ export default function CardEditor() {
               <SliderMark value={watchbarProgress} label="0%" />
             </Slider>
           </div>
-          <div className="property">
-            <h3>Night mode</h3>
-            <Switch
-              colorScheme={"red"}
-              isChecked={nightMode}
-              onChange={(e) => {
-                setNightMode(e.target.checked);
-              }}
-            />
-          </div>
+          <Stack direction="row" spacing={10}>
+            <div className="property">
+              <h3>Night mode</h3>
+              <Switch
+                colorScheme={"red"}
+                isChecked={nightMode}
+                onChange={(e) => {
+                  setNightMode(e.target.checked);
+                }}
+              />
+            </div>
+
+            <div className="property">
+              <h3>Channel verified</h3>
+              <Switch
+                colorScheme={"red"}
+                isChecked={verified}
+                onChange={(e) => {
+                  setVerified(e.target.checked);
+                }}
+              />
+            </div>
+          </Stack>
         </section>
         <Stack direction="row" spacing={4} justifyContent="center">
           <Button
