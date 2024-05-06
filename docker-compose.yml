@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=production
+      - YOUTUBE_API_KEY=AIzaSyBujx65OKJw6k0ksBQzX3Pggf4K_GlilIQ
+    command: npm run start
