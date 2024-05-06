@@ -75,7 +75,7 @@ export default async (req, res) => {
       thumbnail,
       channel: {
         id: channelId,
-        title: channelData.title,
+        name: channelData.snippet.title,
         thumbnail: channelThumbnail,
       },
       views,
